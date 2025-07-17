@@ -1,14 +1,16 @@
-require('dotenv').config();
-const app = require("express")()
-const DataBaseRoutes = require("./routes/DataBaseRouters")
-const bodyParser = require('body-parser');
+require("dotenv").config();
+const express = require("express");
+const bodyParser = require("body-parser");
+const connectToDB = require("./config/db");
+const DataBaseRoutes = require("./routes/DataBaseRouters");
 
-require("./config/db")
+const app = express();
+const port = process.env.PORT || 8000;
 
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use("/api", DataBaseRoutes);
 
-app.use("/api", DataBaseRoutes)
-
+// 404 Handler
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -19,13 +21,12 @@ app.use((req, res) => {
       "POST /api/data", 
       "DELETE /api/data"
     ]
-  })
-})
-const port = process.env.PORT
+  });
+});
 
-app.listen(port, () => {
-    console.log("server has been started", port)
-})
-
-
-// WRITTEN BY SEENU MADHAVAN R
+// ✅ Connect to MongoDB, then start server
+connectToDB().then(() => {
+  app.listen(port, () => {
+    console.log("🚀 Server started on port", port);
+  });
+});
